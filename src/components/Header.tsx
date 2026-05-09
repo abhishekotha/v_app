@@ -14,7 +14,7 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
   const [isMicOn, setIsMicOn] = useState<0 | 1>(0);
   const [isVideoOn, setIsVideoOn] = useState<0 | 1>(0);
   const device = useRef(new mediasoup.Device());
-  const producerTransport = useRef<Record<string ,mediasoup.types.Transport>>({});
+  const producerTransport = useRef<mediasoup.types.Transport | null>(null);
   const producers = useRef<Record<string , mediasoup.types.Producer>>({});
   const streams = useRef<Record<string , MediaStream>>({});
 
@@ -29,14 +29,17 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
       if (!device.current.loaded) {
           await device.current.load({ routerRtpCapabilities: routerRtpCapabilities.data });
       }
+
+      const transportParams = await sfuSocket.emitWithAck("createProducerTransporter");
+      if (transportParams.status !== "success") return;
+      producerTransport.current = device.current.createSendTransport(transportParams.data);
+
   };
 
   const createProducer = async ({type} : {type : string}) => {
-      const transportParams = await sfuSocket.emitWithAck("createProducerTransporter");
-      if (transportParams.status !== "success") return;
-      producerTransport.current[type] = device.current.createSendTransport(transportParams.data);
+      if(!producerTransport.current) return ;
 
-      producerTransport.current[type].on("connect", async ({ dtlsParameters }, callback, errback) => {
+      producerTransport.current.on("connect", async ({ dtlsParameters }, callback, errback) => {
           const result = await sfuSocket.emitWithAck("connectProducer", { dtlsParameters });
           if (result.status === "success") {
               callback();
@@ -46,7 +49,7 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
       });
 
       // produce
-      producerTransport.current[type].on("produce", async ({ kind, rtpParameters }, callback, errback) => {
+      producerTransport.current.on("produce", async ({ kind, rtpParameters }, callback, errback) => {
           const result = await sfuSocket.emitWithAck("produce", {
               kind,
               rtpParameters,
@@ -72,7 +75,7 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
       });
       streams.current[type] = stream;
       const track = stream.getTracks()[0];
-      producers.current[type] = await producerTransport.current[type].produce({ track });
+      producers.current[type] = await producerTransport.current.produce({ track });
 
   };
 

@@ -21,7 +21,7 @@ const Participants = () => {
   const device = useRef(new mediasoup.Device());
   const videoRef = useRef<Record<string , HTMLVideoElement | null>>({});
   const streams = useRef<Record<string , MediaStream>>({});
-  const consumerTransport = useRef<Record<string , mediasoup.types.Transport>>({});
+  const consumerTransport = useRef<mediasoup.types.Transport | null>(null);
   const consumers = useRef<Record<string , mediasoup.types.Consumer>>({});
   const checker = useRef<Record<string , number>>({});
 
@@ -34,14 +34,15 @@ const Participants = () => {
       if (!device.current.loaded) {
           await device.current.load({ routerRtpCapabilities: routerRtpCapabilities.data });
       }
+
+      const transportParams = await sfuSocket.emitWithAck("createConsumerTransporter");
+      if (transportParams.status !== "success") return;
+      consumerTransport.current = device.current.createRecvTransport(transportParams.data);
   };
 
   const createConsumer = async ({type , userId} : {type : string , userId : string}) => {
-      const transportParams = await sfuSocket.emitWithAck("createConsumerTransporter");
-      if (transportParams.status !== "success") return;
-      consumerTransport.current[`${userId}-${type}`] = device.current.createRecvTransport(transportParams.data);
-
-      consumerTransport.current[`${userId}-${type}`].on("connect", async ({ dtlsParameters }, callback, errback) => {
+      if(!consumerTransport.current) return ;
+      consumerTransport.current.on("connect", async ({ dtlsParameters }, callback, errback) => {
           const result = await sfuSocket.emitWithAck("connectConsumer", { dtlsParameters });
           if (result.status === "success") {
               callback();
@@ -57,7 +58,7 @@ const Participants = () => {
 
       if (consumerParams.status !== "success") return;
 
-      const consumer = await consumerTransport.current[`${userId}-${type}`].consume({
+      const consumer = await consumerTransport.current.consume({
           ...consumerParams.data,
           paused: false,
       });
