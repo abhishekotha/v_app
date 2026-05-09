@@ -1,0 +1,72 @@
+.container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+}
+
+.sidebar {
+    position: absolute;
+    top: 80px;
+    right: 10px;
+    width: 260px;
+    height: calc(100vh - 100px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.card {
+    background: #1e1e1e;
+    color: white;
+    padding: 12px;
+    border-radius: 10px;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.close {
+    cursor: pointer;
+}
+
+.actions {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.accept {
+    flex: 1;
+    background: #28a745;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+.reject {
+    flex: 1;
+    background: #dc3545;
+    border: none;
+    padding: 6px;
+    border-radius: 6px;
+    color: white;
+    cursor: pointer;
+}
+
+.centerBox {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}

@@ -1,0 +1,134 @@
+.header {
+  height: 80px;
+  width: 100%;
+  background-color: #0f172a;
+  color: #e5e7eb;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 12px;
+  box-sizing: border-box;
+
+  border-bottom: 1px solid #1f2937;
+}
+
+/* LEFT */
+.left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0; /* IMPORTANT for flex shrink */
+}
+
+.logo {
+  font-size: 18px;
+}
+
+.appName {
+  font-size: 14px;
+  font-weight: 600;
+  color: #f9fafb;
+
+  white-space: nowrap;
+}
+
+/* CENTER */
+.center {
+  flex: 1;
+  text-align: center;
+  min-width: 0; /* allow shrink */
+  padding: 0 8px;
+}
+
+.meetingName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #d1d5db;
+
+  /* 🔥 prevents overlap */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* RIGHT */
+.right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.iconBtn {
+  background: transparent;
+  border: none;
+  color: #e5e7eb;
+  font-size: 16px;
+  cursor: pointer;
+
+  padding: 6px;
+  border-radius: 6px;
+
+  transition: all 0.2s ease;
+}
+
+.iconBtn:hover {
+  background-color: #1f2937;
+}
+
+/* 🔥 Active (selected state) */
+.active {
+  background-color: #2563eb;
+  color: white;
+}
+
+/* 🎤📹 controls (slightly different from normal icons) */
+.controlBtn {
+  background-color: #1f2937;
+  border: none;
+  color: #e5e7eb;
+  font-size: 16px;
+  cursor: pointer;
+
+  padding: 6px 8px;
+  border-radius: 8px;
+
+  transition: all 0.2s ease;
+}
+
+.controlBtn:hover {
+  background-color: #374151;
+}
+
+/* Optional: muted state (future use) */
+.muted {
+  background-color: #dc2626;
+  color: white;
+}
+
+/* 🔥 MOBILE OPTIMIZATION */
+@media (max-width: 600px) {
+  .header {
+    height: 50px;
+    padding: 0 8px;
+  }
+
+  .appName {
+    display: none; /* hide to save space */
+  }
+
+  .meetingName {
+    font-size: 13px;
+  }
+
+  .iconBtn {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  .right {
+    gap: 4px;
+  }
+}
