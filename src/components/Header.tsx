@@ -17,6 +17,7 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
   const producerTransport = useRef<mediasoup.types.Transport | null>(null);
   const producers = useRef<Record<string , mediasoup.types.Producer>>({});
   const streams = useRef<Record<string , MediaStream>>({});
+  const [screenShare , setScreenShare] = useState<number>(0);
 
   const handleToggle = (type: SideContentTypes) => {
     setSideContent(prev => (prev === type ? "" : type));
@@ -129,6 +130,11 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
     streams.current["video"].getVideoTracks().forEach((item) => item.stop());
   };
 
+  const toggleScreenShare = () =>{
+    setScreenShare((pre) => pre === 0 ? 1 : 0);
+    navigator.mediaDevices.getDisplayMedia();
+  }
+
   return (
     <div className={styles.header}>
       <div className={styles.left}>
@@ -159,6 +165,15 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
           }`}
         >
           {isVideoOn === 1 ? "📹" : "🚫"}
+        </button>
+
+        <button
+          onClick={toggleScreenShare}
+          className={`${styles.controlBtn} ${
+            screenShare === 0 ? styles.muted : ""
+          }`}
+        >
+          {screenShare === 1 ? "🖼️" : "🚫"}
         </button>
 
         <button

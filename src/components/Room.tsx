@@ -14,7 +14,7 @@ import { ParticipantsType , appendData, removeParticipant} from "../redux/Partic
 
 import styles from "./styles/Room.module.css";
 
-type Status = "IDLE" | "PENDING" | "ACCEPTED" | "DECLINED";
+type Status = "IDLE" | "PENDING" | "ACCEPTED" | "DECLINED" | "ALREADY_JOIN";
 
 const Room = () => {
     const { roomId, userId } = useParams();
@@ -55,6 +55,9 @@ const Room = () => {
                 dispatch(appendData([storeData]));
                 socket.off("connect");
                 socket.off("join-status");
+            }
+            else if(status === "ALREADY_JOIN"){
+                socket.disconnect();
             }
         });
 
@@ -174,6 +177,13 @@ const Room = () => {
                             Request to Join
                         </button>
                     )}
+                    
+                    {status === "ALREADY_JOIN" && (
+                        <button>
+                            Already In Metting with This Id
+                        </button>
+                    )}
+                    
                 </div>
             )}
         </>
