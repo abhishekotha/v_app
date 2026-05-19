@@ -39,9 +39,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: center;  /* 👈 centers avatar when video is off */
   position: relative;
   height: 100%;
+  overflow: hidden;
 }
 
 .menu {
@@ -51,6 +52,7 @@
   cursor: pointer;
   font-size: 14px;
   color: #9ca3af;
+  z-index: 2;
 }
 
 .avatar {
@@ -77,17 +79,43 @@
   color: white;
 }
 
+/* 👇 video fills the card */
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* 👇 hide video element when cam is off but keep it in DOM for the ref */
+.videoHidden {
+  display: none;
+}
+
+/* 👇 name always pinned to bottom */
 .name {
+  position: absolute;
+  bottom: 24px;
+  left: 0;
+  right: 0;
   font-size: 13px;
   font-weight: 500;
-  margin-bottom: 4px;
   text-align: center;
+  color: white;
+  z-index: 2;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.7);
 }
 
 .status {
+  position: absolute;
+  bottom: 6px;
   display: flex;
   gap: 6px;
   font-size: 13px;
+  z-index: 2;
 }
 
 .pagination {

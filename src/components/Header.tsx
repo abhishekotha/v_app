@@ -18,6 +18,10 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
   const producers = useRef<Record<string , mediasoup.types.Producer>>({});
   const streams = useRef<Record<string , MediaStream>>({});
   const [screenShare , setScreenShare] = useState<number>(0);
+  const screenShareStream = useRef<MediaStream | null>(null);
+  const screenShareProducer = useRef<mediasoup.types.Producer | null>(null);
+  const isScreenShareRef = useRef<boolean>(false);   // 👈 added
+  const produceTypeRef = useRef<string>("");          // 👈 added
 
   const handleToggle = (type: SideContentTypes) => {
     setSideContent(prev => (prev === type ? "" : type));
@@ -35,11 +39,6 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
       if (transportParams.status !== "success") return;
       producerTransport.current = device.current.createSendTransport(transportParams.data);
 
-  };
-
-  const createProducer = async ({type} : {type : string}) => {
-      if(!producerTransport.current) return ;
-
       producerTransport.current.on("connect", async ({ dtlsParameters }, callback, errback) => {
           const result = await sfuSocket.emitWithAck("connectProducer", { dtlsParameters });
           if (result.status === "success") {
@@ -49,34 +48,69 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
           }
       });
 
-      // produce
       producerTransport.current.on("produce", async ({ kind, rtpParameters }, callback, errback) => {
+          const isScreenShare = isScreenShareRef.current;
+          const type = produceTypeRef.current;
           const result = await sfuSocket.emitWithAck("produce", {
               kind,
               rtpParameters,
+              isScreenShare
           });
           if (result.status === "success") {
               callback({ id: result.data.producerId });
-              if(type === "video"){
-                sfuSocket.emit("unpause" , {kind : "video"});
-                socket.emit("mediaChange" , {type : "video" , status : 1});
+              if(isScreenShare){
+                console.log("omekbkbeskjs");
+                socket.emit("screenShare" , 1);
               }
               else{
-                sfuSocket.emit("unpause" , {kind : "audio"});
-                socket.emit("mediaChange" , {type : "audio" , status : 1});
+                console.log("working fine");
+                if(type === "video"){
+                  sfuSocket.emit("unpause" , {kind : "video"});
+                  socket.emit("mediaChange" , {type : "video" , status : 1});
+                }
+                else{
+                  sfuSocket.emit("unpause" , {kind : "audio"});
+                  socket.emit("mediaChange" , {type : "audio" , status : 1});
+                }
               }
           } else {
               errback(new Error("Backend error"));
           }
       });
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-          audio: type === "audio" ? true : false,
-          video: type === "video" ? true : false,
-      });
-      streams.current[type] = stream;
-      const track = stream.getTracks()[0];
-      producers.current[type] = await producerTransport.current.produce({ track });
+  };
+
+  const createProducer = async ({type , isScreenShare = false} : {type : string , isScreenShare?: boolean}) => {
+      if(!producerTransport.current) return ;
+
+
+      isScreenShareRef.current = isScreenShare;
+      produceTypeRef.current = type;
+
+      if(!isScreenShare){
+        const stream = await navigator.mediaDevices.getUserMedia({
+            audio: type === "audio" ? true : false,
+            video: type === "video" ? true : false,
+        });
+        streams.current[type] = stream;
+        const track = stream.getTracks()[0];
+        producers.current[type] = await producerTransport.current.produce({ track });
+      }
+      else{
+        try{
+          const stream = await navigator.mediaDevices.getDisplayMedia({video : true});
+          screenShareStream.current = stream;
+          const track = stream.getTracks()[0];
+          screenShareProducer.current = await producerTransport.current.produce({track});
+          track.addEventListener("ended" , () =>{
+            socket.emit("screenShare" , 0 );
+          })
+        } 
+        catch(e){
+          console.log("User is not given persmission");
+          setScreenShare(0);
+        }
+      }
 
   };
 
@@ -131,8 +165,16 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
   };
 
   const toggleScreenShare = () =>{
-    setScreenShare((pre) => pre === 0 ? 1 : 0);
-    navigator.mediaDevices.getDisplayMedia();
+    if(screenShare === 1){
+      setScreenShare(0);
+      screenShareStream.current?.getTracks().forEach((item) => item.stop());
+      socket.emit("screenShare" , 0 );
+    } 
+    else{
+      setScreenShare(1);
+      createProducer({"type" : "video" , isScreenShare : true});
+    }
+    
   }
 
   return (
@@ -173,7 +215,7 @@ const Header: React.FC<Props> = ({ setSideContent, sideContent }) => {
             screenShare === 0 ? styles.muted : ""
           }`}
         >
-          {screenShare === 1 ? "🖼️" : "🚫"}
+          {screenShare === 1 ? "🖼️" : "🤙"}
         </button>
 
         <button

@@ -5,7 +5,7 @@ import styles from "./styles/People.module.css";
 
 const People = () => {
   const participants = useSelector(
-    (state: RootState) => state.Participants
+    (state: RootState) => state.Participants.participants
   );
 
   return (

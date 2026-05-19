@@ -10,7 +10,7 @@ import {
     appendrequests,
     removeRequest
 } from "../redux/JoinRequest";
-import { ParticipantsType , appendData, removeParticipant} from "../redux/Participants";
+import { ParticipantsType , appendData, removeParticipant , setScreenShare} from "../redux/Participants";
 
 import styles from "./styles/Room.module.css";
 
@@ -37,15 +37,11 @@ const Room = () => {
     };
 
     const handleReject = (userId: string) => {
-        console.log("This is rejected user id " , userId);
         socket.emit("reject-user", { rejectedUserId :  userId });
         dispatch(removeRequest(userId));
     };
 
     const socketOperations = useCallback(() => {
-        socket.on("connect", () => {
-            console.log("socket connected successfully", socket.id);
-        });
 
         socket.on("join-status", (status: Status) => {
             setStatus(status);
@@ -70,7 +66,6 @@ const Room = () => {
         })
 
         socket.on("all-users" , (data : JoinRequestType[]) =>{
-            console.log("all users " , data);
             const roomData : ParticipantsType[] = [];
             data.forEach((item) =>{
                 const storeData : ParticipantsType= {userId : item.userId , userName : item.userId ,email : "Dummy@email.com" , isMuted : parseInt(item.audio) , isVideoOn : parseInt(item.video) ,imageUrl : ""};
@@ -80,6 +75,10 @@ const Room = () => {
             })
             dispatch(appendData(roomData));
             socket.off("all-users");
+        });
+
+        socket.on("screen-share" , (data) =>{
+            dispatch(setScreenShare(data.userId));
         })
 
         socket.on("user-joined" , (data : JoinRequestType ) =>{

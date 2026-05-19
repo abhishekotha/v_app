@@ -9,18 +9,33 @@ export interface ParticipantsType {
   email: string;
 }
 
-const initialData: ParticipantsType[] = [];
+interface InitialStateType {
+  participants: ParticipantsType[];
+  isScreenShare: string;
+}
+
+const initialData: InitialStateType = {
+  participants: [],
+  isScreenShare: "",
+};
 
 const participantsSlice = createSlice({
   name: "participantsSlice",
   initialState: initialData,
+
   reducers: {
-    appendData: (state, action: PayloadAction<ParticipantsType[]>) => {
-      state.push(...action.payload);
+    appendData: (
+      state,
+      action: PayloadAction<ParticipantsType[]>
+    ) => {
+      state.participants.push(...action.payload);
     },
 
-    insertData: (state, action: PayloadAction<ParticipantsType[]>) => {
-      return [...action.payload];
+    insertData: (
+      state,
+      action: PayloadAction<ParticipantsType[]>
+    ) => {
+      state.participants = [...action.payload];
     },
 
     changeMediaStatus: (
@@ -31,21 +46,31 @@ const participantsSlice = createSlice({
         userId: string;
       }>
     ) => {
-      const user = state.find(
+      const user = state.participants.find(
         (item) => item.userId === action.payload.userId
       );
+
       if (user) {
-        if(action.payload.type === "video"){
+        if (action.payload.type === "video") {
           user.isVideoOn = action.payload.status;
-        }
-        else{
+        } else {
           user.isMuted = action.payload.status;
         }
       }
     },
 
-    removeParticipant: (state, action: PayloadAction<string>) => {
-      return state.filter(
+    setScreenShare: (
+      state,
+      action: PayloadAction<string>
+    ) => {
+      state.isScreenShare = action.payload;
+    },
+
+    removeParticipant: (
+      state,
+      action: PayloadAction<string>
+    ) => {
+      state.participants = state.participants.filter(
         (item) => item.userId !== action.payload
       );
     },
@@ -56,7 +81,8 @@ export default participantsSlice.reducer;
 
 export const {
   appendData,
-  insertData,
+ insertData,
   changeMediaStatus,
   removeParticipant,
+  setScreenShare,
 } = participantsSlice.actions;
