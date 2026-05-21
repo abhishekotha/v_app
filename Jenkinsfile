@@ -9,7 +9,7 @@ pipeline{
         stage('testing'){
             steps{
                 sh "docker run -p 3000:80 v_app"
-                sleep(10)
+                sleep time: 10, unit: 'SECONDS'
                 sh "curl http://localhost:3000"
             }
         }
