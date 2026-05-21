@@ -6,6 +6,7 @@ pipeline{
                 sh '''
                     pwd 
                     ls -la
+                    docker --version
                 '''
             }
         }
