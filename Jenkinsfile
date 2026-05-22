@@ -23,7 +23,7 @@ pipeline{
                 withCredentials([usernamePassword(
                     credentialsId : 'Docker_push_id',
                     usernameVariable : "USER",
-                    passwordVariable : : "PASS",
+                    passwordVariable : "PASS",
                 )]){
                     sh "echo $PASS | docker login -u $USER --password-stdin"
                     sh "docker tag ${IMAGE_NAME}:${IMAGE_VERSION} $USER/${IMAGE_NAME}:${IMAGE_VERSION}"
