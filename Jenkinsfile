@@ -2,26 +2,25 @@ pipeline{
     agent any
     environment{
         IMAGE_NAME = "V_APP"
-        IMAGE_VERSION = credentials(VERSION)
+        IMAGE_VERSION = "${BUILD_ID}"
     }
     stages{
-        stage("testing"){
+        stage('build'){
             steps{
-                echo "Testing"
-                sh "echo ${IMAGE_VERSION} ${IMAGE_NAME}"
+                sh "docker build -t ${IMAGE_NAME}:${IMAGE_VERSION} ."
             }
         }
-        // stage('build'){
-        //     steps{
-        //         sh "docker build -t v_app ."
-        //     }
-        // }
-        // stage('testing'){
-        //     steps{
-        //         sh "docker run -d -p 3000:80 --name v_app_container v_app"
-        //         sleep time: 10, unit: 'SECONDS'
-        //         sh "curl http://localhost:3000"
-        //     }
-        // }
+        stage('testing'){
+            steps{
+                sh "docker run -d -p 3000:80 --name dummy ${IMAGE_NAME}:${IMAGE_VERSION}"
+                sleep time: 10, unit: 'SECONDS'
+                sh "curl -f http://localhost:80"
+            }
+            post{
+                always{
+                    sh "docker rm dummy"
+                }
+            }
+        }
     }
 }
