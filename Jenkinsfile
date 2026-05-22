@@ -6,8 +6,10 @@ pipeline{
     }
     stages{
         stage("testing"){
-            echo "Testing"
-            sh "echo ${IMAGE_VERSION} ${IMAGE_NAME}"
+            steps{
+                echo "Testing"
+                sh "echo ${IMAGE_VERSION} ${IMAGE_NAME}"
+            }
         }
         // stage('build'){
         //     steps{
