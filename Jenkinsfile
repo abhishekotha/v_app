@@ -14,7 +14,14 @@ pipeline{
             steps{
                 sh "docker run -d -p 3000:80 --name dummy ${IMAGE_NAME}:${IMAGE_VERSION}"
                 sleep time: 10, unit: 'SECONDS'
-                sh "curl -f http://localhost:3000"
+                script{
+                    def ip = sh(
+                        script: "docker inspect -f '{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}' dummy",
+                        returnStdout: true
+                    ).trim()
+                    sh "curl -f http://${ip}:80"
+                }
+
             }
             post{
                 always{
