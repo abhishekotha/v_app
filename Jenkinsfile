@@ -17,6 +17,19 @@ pipeline{
                 sleep time: 10, unit: 'SECONDS'
                 sh "docker run --rm --network testnet curlimages/curl curl -f http://dummy:80"
             }
+        }
+        stage("uploading"){
+            steps{
+                withCredentials([usernamePassword(
+                    credentialsId : 'Docker_push_id',
+                    usernameVariable : "USER",
+                    passwordVariable : : "PASS",
+                )]){
+                    sh "echo $PASS | docker login -u $USER --password-stdin"
+                    sh "docker tag ${IMAGE_NAME}:${IMAGE_VERSION} $USER/${IMAGE_NAME}:${IMAGE_VERSION}"
+                    sh "docker push $USER/${IMAGE_NAME}:${IMAGE_VERSION}"
+                }
+            }
             post{
                 always{
                     sh "docker stop dummy"
