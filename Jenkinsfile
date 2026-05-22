@@ -1,7 +1,7 @@
 pipeline{
     agent any
     environment{
-        IMAGE_NAME = "V_APP"
+        IMAGE_NAME = "v_app"
         IMAGE_VERSION = "${BUILD_ID}"
     }
     stages{
