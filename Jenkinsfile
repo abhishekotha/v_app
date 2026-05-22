@@ -12,10 +12,10 @@ pipeline{
         }
         stage('testing'){
             steps{
-                sh "docker run -d -p 3000:80 --name dummy ${IMAGE_NAME}:${IMAGE_VERSION}"
+                sh "docker network create testnet || true"
+                sh "docker run -d --name dummy --network testnet ${IMAGE_NAME}:${IMAGE_VERSION}"
                 sleep time: 10, unit: 'SECONDS'
                 sh "docker run --rm --network testnet curlimages/curl curl -f http://dummy:80"
-
             }
             post{
                 always{
